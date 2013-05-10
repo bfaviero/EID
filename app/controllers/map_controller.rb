@@ -38,70 +38,73 @@ class MapController < ApplicationController
       puts routeshash[key]
       puts "ROUTES HASH"
       if routeshash[key] != nil and routeshash[key].length==2
-        #origin and destination
-        ostop = routeshash[key][0]
-        dstop = routeshash[key][1]
-        #get wait time until shuttle gets to origin stop
-        puts ostop.nid
-        puts key
-        puts "WAIT RESPONSEEEEE"
-        getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+key+".json"
-        puts getRequest
-        waitResponse = RestClient.get getRequest
-        waitResponseJSON = JSON.parse(waitResponse)
-        wait = 0
-        vid = ""
-        timeToStop = 0
-        if waitResponseJSON["items"].length > 0
-          waitResponseJSON["items"].each do |item|
-            wait = item["seconds"]
-            vid = item["vehicle_id"]
-            if wait>timeToStop
-              break
-            end
-          end
-
-          #time to walk to the stop
-          walkResponse = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => fromBuilding.latitude.to_s+","+fromBuilding.longitude.to_s, :destination => ostop.latitude.to_s+","+ostop.longitude.to_s, :sensor => false, :mode => "walking"}}
-          walkResponseJSON = JSON.parse(walkResponse)
-          puts "GOOGLE RESPONSE"
-          puts walkResponseJSON
+        begin
+          #origin and destination
+          ostop = routeshash[key][0]
+          dstop = routeshash[key][1]
+          #get wait time until shuttle gets to origin stop
+          puts ostop.nid
+          puts key
+          puts "WAIT RESPONSEEEEE"
+          getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+key+".json"
+          puts getRequest
+          waitResponse = RestClient.get getRequest
+          waitResponseJSON = JSON.parse(waitResponse)
+          wait = 0
+          vid = ""
           timeToStop = 0
-          walkResponseJSON["routes"][0]["legs"].each do |leg|
-            timeToStop += leg["duration"]["value"]
-          end
-          #Get the arrival time at the final destination
-          arrival = 0
-          puts "ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE"
-          arrivalRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+dstop.nid+'/predictions/by-route/'+key+".json"
-          puts arrivalRequest
-          arrivalResponse = RestClient.get arrivalRequest
-          arrivalResponseJSON = JSON.parse(arrivalResponse)
-          puts arrivalResponse
-
-          arrivalResponseJSON["items"].each do |item|
-            if item["vehicle_id"]==vid
-              if item["seconds"]>wait
-                arrival = item["seconds"]
+          if waitResponseJSON["items"].length > 0
+            waitResponseJSON["items"].each do |item|
+              wait = item["seconds"]
+              vid = item["vehicle_id"]
+              if wait>timeToStop
                 break
               end
             end
-          end
-          #Time to walk to destination
-          lastWalk = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => dstop.latitude.to_s+","+dstop.longitude.to_s, :destination => toBuilding.latitude.to_s+","+toBuilding.longitude.to_s, :sensor => false, :mode => "walking"}}
-          lastWalkJSON = JSON.parse(lastWalk)
-          puts "LAST WALK"
-          puts lastWalkJSON
-          walking = 0
-          lastWalkJSON["routes"][0]["legs"].each do |leg|
-            walking += leg["duration"]["value"]
-          end
-          puts "WE HAVE AN OPTION"
-          finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, walking]
-        else
-          puts "GET FAILURE"
-        end
 
+            #time to walk to the stop
+            walkResponse = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => fromBuilding.latitude.to_s+","+fromBuilding.longitude.to_s, :destination => ostop.latitude.to_s+","+ostop.longitude.to_s, :sensor => false, :mode => "walking"}}
+            walkResponseJSON = JSON.parse(walkResponse)
+            puts "GOOGLE RESPONSE"
+            puts walkResponseJSON
+            timeToStop = 0
+            walkResponseJSON["routes"][0]["legs"].each do |leg|
+              timeToStop += leg["duration"]["value"]
+            end
+            #Get the arrival time at the final destination
+            arrival = 0
+            puts "ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE"
+            arrivalRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+dstop.nid+'/predictions/by-route/'+key+".json"
+            puts arrivalRequest
+            arrivalResponse = RestClient.get arrivalRequest
+            arrivalResponseJSON = JSON.parse(arrivalResponse)
+            puts arrivalResponse
+
+            arrivalResponseJSON["items"].each do |item|
+              if item["vehicle_id"]==vid
+                if item["seconds"]>wait
+                  arrival = item["seconds"]
+                  break
+                end
+              end
+            end
+            #Time to walk to destination
+            lastWalk = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => dstop.latitude.to_s+","+dstop.longitude.to_s, :destination => toBuilding.latitude.to_s+","+toBuilding.longitude.to_s, :sensor => false, :mode => "walking"}}
+            lastWalkJSON = JSON.parse(lastWalk)
+            puts "LAST WALK"
+            puts lastWalkJSON
+            walking = 0
+            lastWalkJSON["routes"][0]["legs"].each do |leg|
+              walking += leg["duration"]["value"]
+            end
+            puts "WE HAVE AN OPTION"
+            finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, walking]
+          else
+            puts "GET FAILURE"
+          end
+        rescue
+          retry
+        end
       end
     end
 
