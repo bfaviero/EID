@@ -98,8 +98,8 @@ class MapController < ApplicationController
     end
     if bestOption[0]!=9999
       puts "We've found the best route for you!"
-      departure = Time.now+bestOption[0]
-      arrive = Time.now+bestOption[1]
+      departure = Time.zone.now+bestOption[0]
+      arrive = Time.zone.now+bestOption[1]
       response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
         "You should get off at the " + bestOption[3] + " stop.".to_json
       puts response

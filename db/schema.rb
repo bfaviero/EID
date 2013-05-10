@@ -11,23 +11,19 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130507223537) do
+ActiveRecord::Schema.define(:version => 20130510041046) do
 
   create_table "buildings", :force => true do |t|
-    t.string   "address"
-    t.float    "latitude"
-    t.float    "longitude"
-    t.string   "mit"
-    t.string   "name"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.string "address"
+    t.float  "latitude"
+    t.float  "longitude"
+    t.string "mit"
+    t.string "name"
   end
 
   create_table "routes", :force => true do |t|
-    t.string   "name"
-    t.string   "nid"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.string "name"
+    t.string "nid"
   end
 
   create_table "routes_stops", :id => false, :force => true do |t|
@@ -36,12 +32,10 @@ ActiveRecord::Schema.define(:version => 20130507223537) do
   end
 
   create_table "stops", :force => true do |t|
-    t.float    "latitude"
-    t.float    "longitude"
-    t.string   "nid"
-    t.string   "name"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.float  "latitude"
+    t.float  "longitude"
+    t.string "nid"
+    t.string "name"
   end
 
 end
