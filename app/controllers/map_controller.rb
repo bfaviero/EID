@@ -59,6 +59,7 @@ class MapController < ApplicationController
           arrival = 0
           puts "ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE"
           arrivalRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+dstop.nid+'/predictions/by-route/'+key+".json"
+          puts arrivalRequest
           arrivalResponse = RestClient.get arrivalRequest
           arrivalResponseJSON = JSON.parse(arrivalResponse)
           puts arrivalResponse
