@@ -4,13 +4,14 @@ gem 'rails', '3.2.13'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
-gem 'better_errors'
-gem "binding_of_caller"
+
 gem 'rest-client'
 gem 'hirb'
 gem 'geocoder'
 gem 'json'
 group :development do
+  gem 'better_errors'
+  gem "binding_of_caller"
   gem 'sqlite3'
 end
 

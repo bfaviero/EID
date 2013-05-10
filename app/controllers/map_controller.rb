@@ -15,7 +15,7 @@ class MapController < ApplicationController
     routeslist = [ "saferidebostonall", "saferidebostone",  "saferidebostonw", "saferidecamball", "saferidecambeast",  "saferidecambwest"]
     finalRoutesHash = {"saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil,
       "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
-    bestOption = [9999, 9999, 9999, 9999]
+    bestOption = [9999, 9999, 9999, 9999, "", 9999, 9999]
     ##for each route, find the closest stops to origin and destination
     sf.each do |stopfrom|
       stopfrom.routes.each do |stopfromroute|
@@ -51,10 +51,25 @@ class MapController < ApplicationController
         waitResponseJSON = JSON.parse(waitResponse)
         wait = 0
         vid = ""
+        timeToStop = 0
         if waitResponseJSON["items"].length > 0
-          item = waitResponseJSON["items"][0]
-          wait = item["seconds"]
-          vid = item["vehicle_id"]
+          waitResponseJSON["items"].each do |item|
+            wait = item["seconds"]
+            vid = item["vehicle_id"]
+            if wait>timeToStop
+              break
+            end
+          end
+
+          #time to walk to the stop
+          walkResponse = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => fromBuilding.latitude.to_s+","+fromBuilding.longitude.to_s, :destination => ostop.latitude.to_s+","+ostop.longitude.to_s, :sensor => false, :mode => "walking"}}
+          walkResponseJSON = JSON.parse(walkResponse)
+          puts "GOOGLE RESPONSE"
+          puts walkResponseJSON
+          timeToStop = 0
+          walkResponseJSON["routes"][0]["legs"].each do |leg|
+            timeToStop += leg["duration"]["value"]
+          end
           #Get the arrival time at the final destination
           arrival = 0
           puts "ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE"
@@ -72,9 +87,17 @@ class MapController < ApplicationController
               end
             end
           end
-          #
+          #Time to walk to destination
+          lastWalk = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => dstop.latitude.to_s+","+dstop.longitude.to_s, :destination => toBuilding.latitude.to_s+","+toBuilding.longitude.to_s, :sensor => false, :mode => "walking"}}
+          lastWalkJSON = JSON.parse(lastWalk)
+          puts "LAST WALK"
+          puts lastWalkJSON
+          walking = 0
+          lastWalkJSON["routes"][0]["legs"].each do |leg|
+            walking += leg["duration"]["value"]
+          end
           puts "WE HAVE AN OPTION"
-          finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name]
+          finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, walking]
         else
           puts "GET FAILURE"
         end
@@ -88,9 +111,9 @@ class MapController < ApplicationController
       key = key[0]
       if finalRoutesHash[key] != nil
         option = finalRoutesHash[key]
-        option << Route.where(:nid => key).first.name
+        option[4] = Route.where(:nid => key).first.name
         if option != nil
-          if option[1]< bestOption[1]
+          if option[1]+option[6]< bestOption[1]
             bestOption = option
           end
         end
