@@ -10,19 +10,15 @@ class MapController < ApplicationController
 
     sf = Stop.near(fromBuilding, 1, :order => :distance)
     st = Stop.near(toBuilding, 1, :order => :distance)
-    routeshash = {"saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil,
-      "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
-    routeslist = [ "saferidebostonall", "saferidebostone",  "saferidebostonw", "saferidecamball", "saferidecambeast",  "saferidecambwest"]
-    finalRoutesHash = {"saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil,
-      "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
-    bestOption = [9999, 9999, 9999, 9999, "", 9999, 9999]
+    routeshash = {"tech" => nil, "saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
+    finalRoutesHash = {"tech" => nil, "saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
+    bestOption = [9999, 9999, "Somewhere", "Somewhere else", "", 9999, 9999]
     ##for each route, find the closest stops to origin and destination
     sf.each do |stopfrom|
       stopfrom.routes.each do |stopfromroute|
         routeshash[stopfromroute.nid] ||= [stopfrom]
       end
     end
-
     st.each do |stopto|
       stopto.routes.each do |stoptoroute|
         if routeshash[stoptoroute.nid] != nil and routeshash[stoptoroute.nid].length==1
@@ -31,28 +27,21 @@ class MapController < ApplicationController
       end
     end
 
-    routeshash.each do |key|
-      key = key[0]
-      puts routeshash
-      puts key
-      puts routeshash[key]
-      puts "ROUTES HASH"
-      if routeshash[key] != nil and routeshash[key].length==2
-        begin
+    routeshash.each do |key, value|
+      if value != nil and value.length==2
           #origin and destination
-          ostop = routeshash[key][0]
-          dstop = routeshash[key][1]
+          ostop = value[0]
+          dstop = value[1]
+          #time to walk to the stop
+          timeToStop = TimeToStop(fromBuilding, ostop)
+
           #get wait time until shuttle gets to origin stop
-          puts ostop.nid
-          puts key
-          puts "WAIT RESPONSEEEEE"
           getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+key+".json"
-          puts getRequest
           waitResponse = RestClient.get getRequest
           waitResponseJSON = JSON.parse(waitResponse)
           wait = 0
           vid = ""
-          timeToStop = 0
+
           if waitResponseJSON["items"].length > 0
             waitResponseJSON["items"].each do |item|
               wait = item["seconds"]
@@ -61,50 +50,11 @@ class MapController < ApplicationController
                 break
               end
             end
+            arrival = ArrivalTimeVehicle(vid, dstop.nid, key, wait)
+            lastWalk = WalkingTime(dstop, toBuilding)
 
-            #time to walk to the stop
-            walkResponse = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => fromBuilding.latitude.to_s+","+fromBuilding.longitude.to_s, :destination => ostop.latitude.to_s+","+ostop.longitude.to_s, :sensor => false, :mode => "walking"}}
-            walkResponseJSON = JSON.parse(walkResponse)
-            puts "GOOGLE RESPONSE"
-            puts walkResponseJSON
-            timeToStop = 0
-            walkResponseJSON["routes"][0]["legs"].each do |leg|
-              timeToStop += leg["duration"]["value"]
-            end
-            #Get the arrival time at the final destination
-            arrival = 0
-            puts "ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE ARRIVAL RESPONSE"
-            arrivalRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+dstop.nid+'/predictions/by-route/'+key+".json"
-            puts arrivalRequest
-            arrivalResponse = RestClient.get arrivalRequest
-            arrivalResponseJSON = JSON.parse(arrivalResponse)
-            puts arrivalResponse
-
-            arrivalResponseJSON["items"].each do |item|
-              if item["vehicle_id"]==vid
-                if item["seconds"]>wait
-                  arrival = item["seconds"]
-                  break
-                end
-              end
-            end
-            #Time to walk to destination
-            lastWalk = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => dstop.latitude.to_s+","+dstop.longitude.to_s, :destination => toBuilding.latitude.to_s+","+toBuilding.longitude.to_s, :sensor => false, :mode => "walking"}}
-            lastWalkJSON = JSON.parse(lastWalk)
-            puts "LAST WALK"
-            puts lastWalkJSON
-            walking = 0
-            lastWalkJSON["routes"][0]["legs"].each do |leg|
-              walking += leg["duration"]["value"]
-            end
-            puts "WE HAVE AN OPTION"
-            finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, walking]
-          else
-            puts "GET FAILURE"
+            finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
           end
-        rescue
-          retry
-        end
       end
     end
 
@@ -123,44 +73,98 @@ class MapController < ApplicationController
       end
     end
     if bestOption[0]!=9999
+      id = 0
       puts "We've found the best route for you!"
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]
       response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
         "You should get off at the " + bestOption[3] + " stop.".to_json
-      puts response
     else
+      id = 1
       response =  "We did not find a route for you".to_json
-      puts response
     end
 
 
 
 
-    xml_data
+    xml_data(id, bestOption, response)
     respond_to do |format|
         format.xml { render :xml => @xml }
         format.json {render :json => response}
     end
   end
-  def xml_data
+
+  def xml_data(id, bestOption, response)
+    departure = Time.zone.now+bestOption[0]
+    arrive = Time.zone.now+bestOption[1]
     xml = Builder::XmlMarkup.new
     @xml = xml.ANGELXML{
       xml.MESSAGE {
         xml.PLAY {
           xml.PROMPT("type" => "text") {
-            " "
+            ""
           }
         }
-        xml.GOTO("destination" => "/13")
+        xml.GOTO("destination" => "/6")
       }
       xml.VARIABLES {
-        xml.VAR("name" => "Name", "value" => @name)
-        xml.VAR("name" => "Greeting", "value" => @greeting)
-        xml.VAR("name" => "Gender", "value" => @gender)
-        xml.VAR("name" => "Preference", "value" => @preference)
+        xml.VAR("name" => "departuretime", "value" => departure.strftime("%I:%M"))
+        xml.VAR("name" => "departure", "value" => bestOption[2])
+        xml.VAR("name" => "arrival", "value" => bestOption[3])
+        xml.VAR("name" => "arrivaltime", "value" => arrive.strftime("%I:%M"))
       }
     }
+    end
+
+
+    def TimeToStop(origin, destination)
+      begin
+        walkResponse = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => origin.latitude.to_s+","+origin.longitude.to_s, :destination => destination.latitude.to_s+","+destination.longitude.to_s, :sensor => false, :mode => "walking"}}
+        walkResponseJSON = JSON.parse(walkResponse)
+      rescue
+        retry
+      end
+        timeToStop = 0
+        walkResponseJSON["routes"][0]["legs"].each do |leg|
+          timeToStop += leg["duration"]["value"]
+        end
+        return timeToStop
+    end
+
+    def WalkingTime(from, to)
+      begin
+        lastWalk = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => from.latitude.to_s+","+from.longitude.to_s, :destination => to.latitude.to_s+","+to.longitude.to_s, :sensor => false, :mode => "walking"}}
+        lastWalkJSON = JSON.parse(lastWalk)
+      rescue
+        retry
+      end
+      walking = 0
+      lastWalkJSON["routes"][0]["legs"].each do |leg|
+        walking += leg["duration"]["value"]
+      end
+      return walking
+    end
+
+    def ArrivalTimeVehicle(vehicle, stop, route, wait)
+      #Get the arrival time at the final destination
+      arrival = 0
+      arrivalRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+stop+'/predictions/by-route/'+route+".json"
+      begin
+        arrivalResponse = RestClient.get arrivalRequest
+        arrivalResponseJSON = JSON.parse(arrivalResponse)
+      rescue
+        retry
+      end
+
+      arrivalResponseJSON["items"].each do |item|
+        if item["vehicle_id"]==vehicle
+          if item["seconds"]>wait
+            arrival = item["seconds"]
+            break
+          end
+        end
+      end
+      return arrival
     end
 end
 
