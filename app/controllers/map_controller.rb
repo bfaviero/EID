@@ -3,9 +3,9 @@ class MapController < ApplicationController
   require 'rest_client'
   respond_to :xml
   def logic
-    from = params[:from]
+    from = params[:currentlocation]
     fromBuilding = Building.where(:mit => from).first
-    to = params[:to]
+    to = params[:destinationwanted]
     toBuilding = Building.where(:mit => to).first
 
     sf = Stop.near(fromBuilding, 1, :order => :distance)
