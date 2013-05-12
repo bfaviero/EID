@@ -72,29 +72,29 @@ class MapController < ApplicationController
         end
       end
     end
+    puts finalRoutesHash
     if bestOption[0]!=9999
-      id = 0
       puts "We've found the best route for you!"
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]
       response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
         "You should get off at the " + bestOption[3] + " stop.".to_json
+      xml_data(bestOption, response)
     else
-      id = 1
       response =  "We did not find a route for you".to_json
+      xml_data2(response)
     end
 
 
 
 
-    xml_data(id, bestOption, response)
     respond_to do |format|
         format.xml { render :xml => @xml }
         format.json {render :json => response}
     end
   end
 
-  def xml_data(id, bestOption, response)
+  def xml_data(bestOption, response)
     departure = Time.zone.now+bestOption[0]
     arrive = Time.zone.now+bestOption[1]
     xml = Builder::XmlMarkup.new
@@ -112,6 +112,19 @@ class MapController < ApplicationController
         xml.VAR("name" => "departure", "value" => bestOption[2])
         xml.VAR("name" => "arrival", "value" => bestOption[3])
         xml.VAR("name" => "arrivaltime", "value" => arrive.strftime("%I:%M"))
+      }
+    }
+    end
+    def xml_data2(response)
+    xml = Builder::XmlMarkup.new
+    @xml = xml.ANGELXML{
+      xml.MESSAGE {
+        xml.PLAY {
+          xml.PROMPT("type" => "text") {
+            ""
+          }
+        }
+        xml.GOTO("destination" => "/1")
       }
     }
     end
