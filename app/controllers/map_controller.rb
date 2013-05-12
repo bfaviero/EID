@@ -74,20 +74,24 @@ class MapController < ApplicationController
     end
     puts finalRoutesHash
     if bestOption[0]!=9999
-      puts "We've found the best route for you!"
+      puts "WE'RE FOUND THE BEST ROUTE FOR YOU"
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]
       response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
         "You should get off at the " + bestOption[3] + " stop.".to_json
+      puts "RESPONSE"
+      puts response
       xml_data(bestOption, response)
     else
       response =  "We did not find a route for you".to_json
+      puts "RESPONSE"
+      puts response
       xml_data2(response)
     end
 
 
 
-
+    puts @xml
     respond_to do |format|
         format.xml { render :xml => @xml }
         format.json {render :json => response}
