@@ -3,6 +3,7 @@ class MapController < ApplicationController
   require 'rest_client'
   respond_to :xml
   def logic
+    number = params[:callerid]
     from = params[:currentlocation]
     fromBuilding = Building.where(:mit => from).first
     to = params[:destinationwanted]
@@ -10,8 +11,8 @@ class MapController < ApplicationController
 
     sf = Stop.near(fromBuilding, 1, :order => :distance)
     st = Stop.near(toBuilding, 1, :order => :distance)
-    routeshash = {"tech" => nil, "saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
-    finalRoutesHash = {"tech" => nil, "saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
+    routeshash = {"saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
+    finalRoutesHash = {"saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
     bestOption = [9999, 9999, "Somewhere", "Somewhere else", "", 9999, 9999]
     ##for each route, find the closest stops to origin and destination
     sf.each do |stopfrom|
@@ -57,8 +58,8 @@ class MapController < ApplicationController
           end
       end
     end
-
-
+    puts "FINAL ROUTES HASH"
+    puts finalRoutesHash
     #now put it all together
     finalRoutesHash.each do |key|
       key = key[0]
@@ -81,6 +82,7 @@ class MapController < ApplicationController
         "You should get off at the " + bestOption[3] + " stop.".to_json
       puts "RESPONSE"
       puts response
+      text(number, response)
       xml_data(bestOption, response)
     else
       response =  "We did not find a route for you".to_json
@@ -182,6 +184,19 @@ class MapController < ApplicationController
         end
       end
       return arrival
+    end
+    def text(number, response)
+      twilio_sid = "AC04688af1bb3a335d3a01229ae63faaa5"
+      twilio_token = "6d0a0bfea26a14afc13e651d4c415110"
+      twilio_phone_number = "9543562027"
+
+      @twilio_client = Twilio::REST::Client.new twilio_sid, twilio_token
+
+      @twilio_client.account.sms.messages.create(
+        :from => "+1#{twilio_phone_number}",
+        :to => number,
+        :body => response
+      )
     end
 end
 
