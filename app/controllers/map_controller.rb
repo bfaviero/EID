@@ -166,7 +166,7 @@ class MapController < ApplicationController
             ""
           }
         }
-        xml.GOTO("destination" => "/6")
+        xml.GOTO("destination" => "/15")
       }
       xml.VARIABLES {
         xml.VAR("name" => "departuretime", "value" => departure.strftime("%I:%M"))
