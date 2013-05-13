@@ -1,5 +1,6 @@
 Mobile::Application.routes.draw do
-  match '/logic' => 'map#logic'
+  match '/logic' => 'map#getParams'
+  match '/sms' => 'map#receive'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

@@ -2,11 +2,65 @@ class MapController < ApplicationController
   require 'builder'
   require 'rest_client'
   respond_to :xml
-  def logic
+  def textUser
+    number = params[:callerid]
+    response = params[:response)]
+    text(number, response)
+    testxml
+    respond_to do |format|
+        format.xml { render :xml => @xml }
+    end
+  end
+
+
+
+  def textxml
+    xml = Builder::XmlMarkup.new
+    @xml = xml.ANGELXML{
+      xml.MESSAGE {
+        xml.PLAY {
+          xml.PROMPT("type" => "text") {
+            ""
+          }
+        }
+        xml.GOTO("destination" => "/7")
+      }
+    }
+    end
+
+
+
+  def receive
+    body = params["Body"]
+    number = params["From"]
+    a = exchange.latest.times
+    bldg =  /([A-Z]+\d*)|([A-Z]+)|(\d+)/
+    matchBldg = body.scan bldg
+    if matchBldg.length == 2
+      from = Building.where(:mit => matchBldg[0][0]).first
+      to = Building.where(:mit => matchBldg[1][0]).first
+      if from and to
+        logic(number, from, to)
+      else
+        if from
+          text(number, "Sorry, we don't have '"+to+"' in our system.")
+        else
+          text(number, "Sorry, we don't have '"+from+"' in our system.")
+        end
+      end
+    else
+      text(number, "Sorry, I didn't understand that. You can type in the two building names you want to go to in capital letters" +
+        " with a space in between.")
+    end
+  end
+  def getParams
     number = params[:callerid]
     from = params[:currentlocation]
-    fromBuilding = Building.where(:mit => from).first
     to = params[:destinationwanted]
+    logic(number, from, to)
+  end
+  def logic(number, from, to)
+    fromBuilding = Building.where(:mit => from).first
     toBuilding = Building.where(:mit => to).first
 
     sf = Stop.near(fromBuilding, 1, :order => :distance)
@@ -82,7 +136,8 @@ class MapController < ApplicationController
         "You should get off at the " + bestOption[3] + " stop.".to_json
       puts "RESPONSE"
       puts response
-      text(number, response)
+      if number
+      end
       xml_data(bestOption, response)
     else
       response =  "We did not find a route for you".to_json
