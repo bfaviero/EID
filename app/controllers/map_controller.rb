@@ -6,7 +6,7 @@ class MapController < ApplicationController
     number = params[:callerid]
     response = params[:response]
     text(number, response)
-    testxml
+    textxml
     respond_to do |format|
         format.xml { render :xml => @xml }
     end
