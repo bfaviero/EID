@@ -4,7 +4,7 @@ class MapController < ApplicationController
   respond_to :xml
   def textUser
     number = params[:callerid]
-    response = params[:response)]
+    response = params[:response]
     text(number, response)
     testxml
     respond_to do |format|
@@ -198,6 +198,7 @@ class MapController < ApplicationController
         walkResponse = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => origin.latitude.to_s+","+origin.longitude.to_s, :destination => destination.latitude.to_s+","+destination.longitude.to_s, :sensor => false, :mode => "walking"}}
         walkResponseJSON = JSON.parse(walkResponse)
       rescue
+        puts  "TIME TO STOP FAILED"
         retry
       end
         timeToStop = 0
@@ -212,6 +213,7 @@ class MapController < ApplicationController
         lastWalk = RestClient.get 'http://maps.googleapis.com/maps/api/directions/json', {:params => {:origin => from.latitude.to_s+","+from.longitude.to_s, :destination => to.latitude.to_s+","+to.longitude.to_s, :sensor => false, :mode => "walking"}}
         lastWalkJSON = JSON.parse(lastWalk)
       rescue
+        puts  "WALKING TIME FAILED"
         retry
       end
       walking = 0
@@ -229,6 +231,7 @@ class MapController < ApplicationController
         arrivalResponse = RestClient.get arrivalRequest
         arrivalResponseJSON = JSON.parse(arrivalResponse)
       rescue
+        puts  "ARRIVAL TIME FAILED"
         retry
       end
 
