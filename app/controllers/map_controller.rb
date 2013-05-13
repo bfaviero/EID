@@ -173,6 +173,8 @@ class MapController < ApplicationController
         xml.VAR("name" => "departure", "value" => bestOption[2])
         xml.VAR("name" => "arrival", "value" => bestOption[3])
         xml.VAR("name" => "arrivaltime", "value" => arrive.strftime("%I:%M"))
+        xml.VAR("name" => "response", "value" => response)
+
       }
     }
     end
