@@ -47,9 +47,9 @@ class MapController < ApplicationController
         puts "from, to"
       else
         if from
-          text(number, "Sorry, we don't have '"+to+"' in our system.")
+          text(number, "Sorry, we don't have '"+to.to_s+"' in our system. Type any pair of destinations with either the MIT building number (with letters in caps), or the initials of the living group (in all caps)")
         else
-          text(number, "Sorry, we don't have '"+from+"' in our system.")
+          text(number, "Sorry, we don't have '"+from.to_s+"' in our system. Type any pair of destinations with either the MIT building number (with letters in caps), or the initials of the living group (in all caps)")
         end
       end
     else
