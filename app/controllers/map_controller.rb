@@ -29,7 +29,7 @@ class MapController < ApplicationController
     end
 
 
-
+  #Receives a text message and processes its commands
   def receive
     body = params["Body"]
     number = params["From"]
@@ -53,12 +53,15 @@ class MapController < ApplicationController
         " with a space in between.")
     end
   end
+  #Gets the parameters from Angel
   def getParams
+    puts "receiving"
     number = params[:callerid]
     from = params[:currentlocation]
     to = params[:destinationwanted]
     logic(number, from, to)
   end
+  #Calculates the fastest route based on the origin and destination
   def logic(number, from, to)
     fromBuilding = Building.where(:mit => from).first
     toBuilding = Building.where(:mit => to).first
@@ -112,8 +115,6 @@ class MapController < ApplicationController
           end
       end
     end
-    puts "FINAL ROUTES HASH"
-    puts finalRoutesHash
     #now put it all together
     finalRoutesHash.each do |key|
       key = key[0]
@@ -128,9 +129,7 @@ class MapController < ApplicationController
       end
     end
     puts finalRoutesHash
-    puts "FINAL ROUTES HASHHHHHHHHHHHHHH"
     if bestOption[0]!=9999
-      puts "WE'RE FOUND THE BEST ROUTE FOR YOU"
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]
       response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
@@ -140,8 +139,6 @@ class MapController < ApplicationController
       xml_data(bestOption, response)
     else
       response =  "We did not find a route for you".to_json
-      puts "RESPONSE"
-      puts response
       xml_data2(response)
     end
 
@@ -153,7 +150,7 @@ class MapController < ApplicationController
         format.json {render :json => response}
     end
   end
-
+  #Builds the XML response in the case of a successful route found
   def xml_data(bestOption, response)
     departure = Time.zone.now+bestOption[0]
     arrive = Time.zone.now+bestOption[1]
@@ -177,6 +174,7 @@ class MapController < ApplicationController
       }
     }
     end
+    #Builds the XML response in the case of no route found
     def xml_data2(response)
     xml = Builder::XmlMarkup.new
     @xml = xml.ANGELXML{
@@ -201,7 +199,7 @@ class MapController < ApplicationController
         retry
       end
         timeToStop = 0
-        if walkResponseJSON["status"]!="OK"
+        if walkResponseJSON["status"]=="OK"
           walkResponseJSON["routes"][0]["legs"].each do |leg|
             timeToStop += leg["duration"]["value"]
           end
@@ -218,7 +216,7 @@ class MapController < ApplicationController
         retry
       end
       walking = 0
-      if lastWalkJSON["status"]!="OK"
+      if lastWalkJSON["status"]=="OK"
         lastWalkJSON["routes"][0]["legs"].each do |leg|
           walking += leg["duration"]["value"]
         end
@@ -237,7 +235,6 @@ class MapController < ApplicationController
         puts  "ARRIVAL TIME FAILED"
         retry
       end
-      raise
       arrivalResponseJSON["items"].each do |item|
         if item["vehicle_id"]==vehicle
           if item["seconds"]>wait
