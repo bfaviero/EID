@@ -37,9 +37,23 @@ class MapController < ApplicationController
     bldg =  /([A-Z]+\d*)|([A-Z]+)|(\d+)/
     matchBldg = body.scan bldg
 
-    if matchBldg.length == 2
-      from = Building.where(:mit => matchBldg[0][0]).first
-      to = Building.where(:mit => matchBldg[1][0]).first
+    if matchBldg.length == 2 or matchBldg.length==1
+      matches = []
+      matchBldg.each do |tofrom|
+        tofrom.each do |m|
+          if m != nil
+            matches << m
+          end
+        end
+      end
+
+      if matchBldg.length==2
+        from = Building.where(:mit => matches[0]).first
+        to = Building.where(:mit => matches[1]).first
+      else
+        from = Building.where(:mit => "W20").first
+        to = Building.where(:mit => matches[1]).first
+      end
       if from and to
         logic(number, from.mit, to.mit, true)
 
