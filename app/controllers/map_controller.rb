@@ -144,7 +144,7 @@ class MapController < ApplicationController
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]
       response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
-        "You should get off at the " + bestOption[3] + " stop.".to_json
+        " You should get off at the " + bestOption[3] + " stop.".to_json
       puts "RESPONSE"
       puts response
       response = response.gsub('"', '')
