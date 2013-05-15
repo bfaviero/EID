@@ -36,20 +36,10 @@ class MapController < ApplicationController
     number = params["From"]
     bldg =  /([A-Z]+\d*)|([A-Z]+)|(\d+)/
     matchBldg = body.scan bldg
-    puts matchBldg
+
     if matchBldg.length == 2
-      matchBldg[0].each do |m|
-        unless m.nil?
-          from = m
-        end
-      end
-      matchBldg[1].each do |m|
-        unless m.nil?
-          from = m
-        end
-      end
-      from = Building.where(:mit => from).first
-      to = Building.where(:mit => to).first
+      from = Building.where(:mit => matchBldg[0][0]).first
+      to = Building.where(:mit => matchBldg[1][0]).first
       if from and to
         logic(number, from.mit, to.mit, true)
 
