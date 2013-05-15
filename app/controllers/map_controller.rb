@@ -48,8 +48,8 @@ class MapController < ApplicationController
           from = m
         end
       end
-      from = Building.where(:mit => m).first
-      to = Building.where(:mit => m).first
+      from = Building.where(:mit => from).first
+      to = Building.where(:mit => to).first
       if from and to
         logic(number, from.mit, to.mit, true)
 
