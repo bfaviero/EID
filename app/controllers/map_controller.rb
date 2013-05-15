@@ -147,6 +147,8 @@ class MapController < ApplicationController
         "You should get off at the " + bestOption[3] + " stop.".to_json
       puts "RESPONSE"
       puts response
+      response = response.gsub('"', '')
+
       if id==1
         text(number, response)
       end
