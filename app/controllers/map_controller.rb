@@ -36,6 +36,7 @@ class MapController < ApplicationController
     number = params["From"]
     bldg =  /([A-Z]+\d*)|([A-Z]+)|(\d+)/
     matchBldg = body.scan bldg
+    puts matchBldg
     if matchBldg.length == 2
       from = Building.where(:mit => matchBldg[0][0]).first
       to = Building.where(:mit => matchBldg[1][0]).first
