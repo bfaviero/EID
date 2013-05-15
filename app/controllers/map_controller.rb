@@ -39,12 +39,12 @@ class MapController < ApplicationController
     puts matchBldg
     if matchBldg.length == 2
       matchBldg[0].each do |m|
-        if m.length>0
+        unless m.nil?
           from = m
         end
       end
       matchBldg[1].each do |m|
-        if m.length>0
+        unless m.nil?
           from = m
         end
       end
