@@ -46,11 +46,7 @@ class MapController < ApplicationController
         puts to
         puts "from, to"
       else
-        if from
-          text(number, "Sorry, we don't have '"+to.to_s+"' in our system. Type any pair of destinations with either the MIT building number (with letters in caps), or the initials of the living group (in all caps)")
-        else
-          text(number, "Sorry, we don't have '"+from.to_s+"' in our system. Type any pair of destinations with either the MIT building number (with letters in caps), or the initials of the living group (in all caps)")
-        end
+        id=3
       end
     else
       text(number, "Sorry, I didn't understand that. You can type in the two building names you want to go to in capital letters" +
@@ -153,6 +149,8 @@ class MapController < ApplicationController
 
       if id==1
         text(number, response)
+      elsif id==3
+        text(number, "Sorry, we don't have '"+to.to_s+"' in our system. Type any pair of destinations with either the MIT building number (with letters in caps), or the initials of the living group (in all caps)")
       end
       xml_data(bestOption, response)
     else
