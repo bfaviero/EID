@@ -38,8 +38,18 @@ class MapController < ApplicationController
     matchBldg = body.scan bldg
     puts matchBldg
     if matchBldg.length == 2
-      from = Building.where(:mit => matchBldg[0][0]).first
-      to = Building.where(:mit => matchBldg[1][0]).first
+      matchBldg[0].each do |m|
+        if m.length>0
+          from = m
+        end
+      end
+      matchBldg[1].each do |m|
+        if m.length>0
+          from = m
+        end
+      end
+      from = Building.where(:mit => m).first
+      to = Building.where(:mit => m).first
       if from and to
         logic(number, from.mit, to.mit, true)
 
