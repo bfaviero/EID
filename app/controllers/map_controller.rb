@@ -149,7 +149,10 @@ class MapController < ApplicationController
       puts "RESPONSE"
       puts response
       response = response.gsub('"', '')
-
+      puts "TEXTBOOL"
+      puts textbool
+      puts "routefound"
+      puts routefound
       if textbool
         if routefound
           text(number, response)
