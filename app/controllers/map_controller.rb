@@ -133,7 +133,7 @@ class MapController < ApplicationController
         option = finalRoutesHash[key]
         option[4] = Route.where(:nid => key).first.name
         if option != nil
-          if option[1]+option[6]< bestOption[1]
+          if option[1]+option[6]< bestOption[1]+bestOption[6]
             bestOption = option
           end
         end
@@ -142,7 +142,7 @@ class MapController < ApplicationController
     puts finalRoutesHash
     if bestOption[0]!=9999
       departure = Time.zone.now+bestOption[0]
-      arrive = Time.zone.now+bestOption[1]
+      arrive = Time.zone.now+bestOption[1]+bestOption[6]
       response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
         " You should get off at the " + bestOption[3] + " stop.".to_json
       puts "RESPONSE"
