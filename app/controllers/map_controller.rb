@@ -52,7 +52,7 @@ class MapController < ApplicationController
         to = Building.where(:mit => matches[1]).first
       else
         from = Building.where(:mit => "W20").first
-        to = Building.where(:mit => matches[1]).first
+        to = Building.where(:mit => matches[0]).first
       end
       if from and to
         logic(number, from.mit, to.mit, true)
