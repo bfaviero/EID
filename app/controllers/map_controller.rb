@@ -123,6 +123,8 @@ class MapController < ApplicationController
             lastWalk = WalkingTime(dstop, toBuilding)
 
             finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
+          else
+            text(number, "Sorry, the Saferide isn't running. Try again later!")
           end
       end
     end
