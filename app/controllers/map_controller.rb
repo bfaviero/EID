@@ -31,16 +31,20 @@ class MapController < ApplicationController
 
   #Receives a text message and processes its commands
   def receive
+    puts "received text"
     body = params["Body"]
     number = params["From"]
-    a = exchange.latest.times
     bldg =  /([A-Z]+\d*)|([A-Z]+)|(\d+)/
     matchBldg = body.scan bldg
     if matchBldg.length == 2
       from = Building.where(:mit => matchBldg[0][0]).first
       to = Building.where(:mit => matchBldg[1][0]).first
       if from and to
-        logic(number, from, to)
+        logic(number, from.mit, to.mit, 1)
+
+        puts from
+        puts to
+        puts "from, to"
       else
         if from
           text(number, "Sorry, we don't have '"+to+"' in our system.")
@@ -51,7 +55,11 @@ class MapController < ApplicationController
     else
       text(number, "Sorry, I didn't understand that. You can type in the two building names you want to go to in capital letters" +
         " with a space in between.")
+      respond_to do |format|
+        format.xml { render xml: number }
+      end
     end
+
   end
   #Gets the parameters from Angel
   def getParams
@@ -59,10 +67,13 @@ class MapController < ApplicationController
     number = params[:callerid]
     from = params[:currentlocation]
     to = params[:destinationwanted]
+    puts number
+    puts from
+    puts to
     logic(number, from, to)
   end
   #Calculates the fastest route based on the origin and destination
-  def logic(number, from, to)
+  def logic(number, from, to, id=0)
     fromBuilding = Building.where(:mit => from).first
     toBuilding = Building.where(:mit => to).first
 
@@ -136,6 +147,9 @@ class MapController < ApplicationController
         "You should get off at the " + bestOption[3] + " stop.".to_json
       puts "RESPONSE"
       puts response
+      if id==1
+        text(number, response)
+      end
       xml_data(bestOption, response)
     else
       response =  "We did not find a route for you".to_json
@@ -246,6 +260,7 @@ class MapController < ApplicationController
       return arrival
     end
     def text(number, response)
+      puts "SENDING TEXT SENDING TEXT SENDING TEXT SENDING TEXT "
       twilio_sid = "AC04688af1bb3a335d3a01229ae63faaa5"
       twilio_token = "6d0a0bfea26a14afc13e651d4c415110"
       twilio_phone_number = "9543562027"
