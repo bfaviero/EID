@@ -40,13 +40,14 @@ class MapController < ApplicationController
       from = Building.where(:mit => matchBldg[0][0]).first
       to = Building.where(:mit => matchBldg[1][0]).first
       if from and to
-        logic(number, from.mit, to.mit, 1)
+        logic(number, from.mit, to.mit, true)
 
         puts from
         puts to
         puts "from, to"
       else
-        id=3
+        text(number, "Sorry, I didn't understand that. You can type in the two building names you want to go to in capital letters" +
+        " with a space in between.")
       end
     else
       text(number, "Sorry, I didn't understand that. You can type in the two building names you want to go to in capital letters" +
@@ -69,14 +70,16 @@ class MapController < ApplicationController
     logic(number, from, to)
   end
   #Calculates the fastest route based on the origin and destination
-  def logic(number, from, to, id=0)
+  def logic(number, from, to, textbool=false)
+    routefound = false
+    noroutefound = 0
     fromBuilding = Building.where(:mit => from).first
     toBuilding = Building.where(:mit => to).first
 
     sf = Stop.near(fromBuilding, 1, :order => :distance)
     st = Stop.near(toBuilding, 1, :order => :distance)
-    routeshash = {"saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
-    finalRoutesHash = {"saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
+    routeshash = {"boston" => nil, "saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
+    finalRoutesHash = {"boston" => nil, "saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
     bestOption = [9999, 9999, "Somewhere", "Somewhere else", "", 9999, 9999]
     ##for each route, find the closest stops to origin and destination
     sf.each do |stopfrom|
@@ -120,7 +123,7 @@ class MapController < ApplicationController
 
             finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
           else
-            text(number, "Sorry, the Saferide isn't running. Try again later!")
+            routefound = true
           end
       end
     end
@@ -147,10 +150,12 @@ class MapController < ApplicationController
       puts response
       response = response.gsub('"', '')
 
-      if id==1
-        text(number, response)
-      elsif id==3
-        text(number, "Sorry, we don't have '"+to.to_s+"' in our system. Type any pair of destinations with either the MIT building number (with letters in caps), or the initials of the living group (in all caps)")
+      if textbool
+        if routefound
+          text(number, response)
+        else
+          text(number, "Sorry, the Saferide isn't running. Try again later!")
+        end
       end
       xml_data(bestOption, response)
     else
