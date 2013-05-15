@@ -8,7 +8,7 @@
 
 routes = ["boston", [[42.35927, -71.09368, '02', '77 Mass Ave'], [42.35952, -71.09416, '03', '84 Mass Ave'], [42.3509163, -71.0894084, '13', 'Beacon St at Mass Ave'], [42.3492899, -71.0998196, '59', 'Commonwealth @ Sherbron'], [42.3488099, -71.094014, '21', '478 Commonwealth Ave'], [42.34915, -71.09463, '22', '487 Commonwealth Ave'], [42.3601699, -71.0975194, '23', 'NW10\\/Edgerton'], [42.35103, -71.08963, '29', 'Mass Ave at Beacon St']]]
 stops = routes[1]
-route = Route.where(:nid => "tech").first
+route = Route.where(:nid => "boston").first
 stops.each do |stopinfo|
   stop = Stop.where(:nid => stopinfo[2]).first
   if stop.nil?
