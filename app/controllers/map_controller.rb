@@ -37,6 +37,7 @@ class MapController < ApplicationController
     bldg =  /([A-Z]+\d*)|(\d+)/
     matchBldg = body.scan bldg
     matches = []
+    puts matchBldg
       matchBldg.each do |tofrom|
         tofrom.each do |m|
           if m != nil
@@ -45,7 +46,7 @@ class MapController < ApplicationController
         end
       end
     puts "MATCHES"
-    puts matches
+    puts MATCHES
     if matches.length == 2 or matches.length==1
       if matches.length==2
         from = Building.where(:mit => matches[0]).first
