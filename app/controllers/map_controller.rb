@@ -142,6 +142,7 @@ class MapController < ApplicationController
       toIndex = 0
       #get indices
       i = 0
+      route = Route.where(:nid => route).first
       route.stops.each do |stop|
         if stop==info[0]
           fromIndex = i
