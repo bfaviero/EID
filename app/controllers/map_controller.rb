@@ -118,10 +118,10 @@ class MapController < ApplicationController
     toBuilding = Building.where(:mit => to).first
     sf = Stop.near(fromBuilding, 1, :order => :distance)
     st = Stop.near(toBuilding, 1, :order => :distance)
-    if fromBuilding.address.include? "Cambridge"
-      routeshash = {"saferidebostonw" => nil, "saferidecamball" => nil, "saferidecambeast" => nil,  "saferidecambwest" => nil}
+    if fromBuilding.address.include? "Cambridge" and toBuilding.address.include? "Cambridge"
+      routeshash = {"saferidecamball" => 0, "saferidecambeast" => 0,  "saferidecambwest" => 0}
     else
-      routeshash = {"boston" => nil, "saferidebostonall" => nil, "saferidebostone" => nil,  "saferidebostonw" => nil}
+      routeshash = {"boston" => 0, "saferidebostonall" => 0, "saferidebostone" => 0,  "saferidebostonw" => 0}
     end
 
     options = []
@@ -129,22 +129,21 @@ class MapController < ApplicationController
     count = 0
     sf.each do |stopfrom|
       stopfrom.routes.each do |stopfromroute|
-        if routeshash[stopfromroute.nid].nil?
+        if routeshash[stopfromroute.nid] == 0
           routeshash[stopfromroute.nid] = [stopfrom]
           count+=1
         end
-        if count==3
+        if count==routeshash.length
           break
         end
       end
-      if count==3
+      if count==routeshash.length
           break
         end
     end
-
     st.each do |stopto|
       stopto.routes.each do |stoptoroute|
-        if routeshash[stoptoroute.nid] != nil and routeshash[stoptoroute.nid].length==1
+        if routeshash[stoptoroute.nid] != nil and routeshash[stoptoroute.nid] != 0 and routeshash[stoptoroute.nid].length==1
           routeshash[stoptoroute.nid] << [stopto]
         end
       end
