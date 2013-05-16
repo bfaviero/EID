@@ -188,7 +188,7 @@ class MapController < ApplicationController
                 break
               end
             end
-            arrival = ArrivalTimeVehicle(vid, dstop.nid, key, wait)
+            arrival = ArrivalTimeVehicle(vid, dstop.nid, routeNID, wait)
             lastWalk = cache[dstop.id][toBuilding.id]
             route = Route.where(:nid => routeNID).first
             goodRoute = [route.name, wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
