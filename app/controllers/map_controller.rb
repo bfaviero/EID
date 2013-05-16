@@ -175,6 +175,7 @@ class MapController < ApplicationController
         text(number, "Your best option is walking, which will get you there at "+arrivalTime+".")
         textbool = false
       end
+    end
     if bestOption[0]!=9999
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]+bestOption[6]
