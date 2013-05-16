@@ -167,6 +167,14 @@ class MapController < ApplicationController
       end
     end
     puts finalRoutesHash
+    walk = WalkingTime(fromBuilding, toBuilding)
+    if walk>0
+      walkingOption = [0, 0, "", "", "", 0, walk]
+      if walkingOption[6] < bestOption[1]+bestOption[6]
+        arrivalTime = Time.zone.now+walkingOption[6].strftime("%I:%M")
+        text(number, "Your best option is walking, which will get you there at "+arrivalTime+".")
+        textbool = false
+      end
     if bestOption[0]!=9999
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]+bestOption[6]
@@ -188,6 +196,7 @@ class MapController < ApplicationController
       end
       xml_data(bestOption, response)
     else
+
       response =  "We did not find a route for you".to_json
       xml_data2(response)
     end
