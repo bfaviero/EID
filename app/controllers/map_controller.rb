@@ -217,10 +217,10 @@ class MapController < ApplicationController
         response += " The Saferide is not running at this time."
       end
     else
-      departure = Time.zone.now+bestOption[1]
-      arrive = Time.zone.now+bestOption[2]+bestOption[7]
-      response = "The " + bestOption[] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
-        " You should get off at the " + bestOption[4] + " stop.".to_json
+      departure = Time.zone.now+best[1]
+      arrive = Time.zone.now+best[2]+best[7]
+      response = "The " + best[0] + " leaves from " + best[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
+        " You should get off at the " + best[4] + " stop."
       response = response.gsub('"', '')
     end
     xml_data2(response)
