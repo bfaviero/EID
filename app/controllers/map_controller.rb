@@ -45,7 +45,7 @@ class MapController < ApplicationController
         end
       end
     if matches.length == 2 or matches.length==1
-      if matchBldg.length==2
+      if matches.length==2
         from = Building.where(:mit => matches[0]).first
         to = Building.where(:mit => matches[1]).first
       else
