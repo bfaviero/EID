@@ -1,7 +1,19 @@
 class MapController < ApplicationController
+  around_filter :profile if Rails.env == 'development'
   require 'builder'
   require 'rest_client'
   respond_to :xml
+  def profile
+    if params[:profile] && result = RubyProf.profile { yield }
+
+      out = StringIO.new
+      RubyProf::GraphHtmlPrinter.new(result).print out, :min_percent => 0
+      self.response_body = out.string
+
+    else
+      yield
+    end
+  end
   def textUser
     number = params[:callerid]
     response = params[:response]
@@ -75,14 +87,8 @@ class MapController < ApplicationController
     else
       text(number, "Sorry, I didn't understand that. You can type in the two building names you want to go to in capital letters" +
         " with a space in between.")
-      respond_to do |format|
-        format.xml { render xml: number }
-      end
     end
-    textxml
-    respond_to do |format|
-        format.xml { render :xml => @xml }
-    end
+    render :nothing => true
   end
   #Gets the parameters from Angel
   def goodPoint(from, to, i)
@@ -223,12 +229,7 @@ class MapController < ApplicationController
         " You should get off at the " + best[4] + " stop."
       response = response.gsub('"', '')
     end
-    xml_data2(response)
     text(number, response)
-
-    respond_to do |format|
-        format.xml { render :xml => @xml }
-    end
   end
   #Calculates the fastest route based on the origin and destination
   def logic(number, from, to, textbool=false)

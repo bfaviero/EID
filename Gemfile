@@ -14,7 +14,9 @@ group :development do
   gem "binding_of_caller"
   gem 'sqlite3'
 end
-
+group :development do
+    gem "ruby-prof"
+end
 group :production do
   gem 'pg'
 end
