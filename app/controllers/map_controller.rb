@@ -126,10 +126,20 @@ class MapController < ApplicationController
 
     options = []
     ##for each route, find the closest stops to origin and destination
+    count = 0
     sf.each do |stopfrom|
       stopfrom.routes.each do |stopfromroute|
-        routeshash[stopfromroute.nid] ||= [stopfrom]
+        if routeshash[stopfromroute.nid].nil?
+          routeshash[stopfromroute.nid] = [stopfrom]
+          count+=1
+        end
+        if count==3
+          break
+        end
       end
+      if count==3
+          break
+        end
     end
 
     st.each do |stopto|
