@@ -68,12 +68,11 @@ class MapController < ApplicationController
       respond_to do |format|
         format.xml { render xml: number }
       end
+    end
     textxml
     respond_to do |format|
         format.xml { render :xml => @xml }
     end
-    end
-
   end
   #Gets the parameters from Angel
   def getParams
