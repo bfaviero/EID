@@ -33,20 +33,22 @@ class MapController < ApplicationController
   def receive
     puts "received text"
     body = params["Body"]
+    puts "BODY"
+    puts body
     number = params["From"]
     bldg =  /([A-Z]+\d*)|(\d+)/
     matchBldg = body.scan bldg
     matches = []
     puts matchBldg
-      matchBldg.each do |tofrom|
-        tofrom.each do |m|
-          if m != nil
-            matches << m
-          end
+    matchBldg.each do |tofrom|
+      tofrom.each do |m|
+        if m != nil
+          matches << m
         end
       end
+    end
     puts "MATCHES"
-    puts MATCHES
+    puts matches
     if matches.length == 2 or matches.length==1
       if matches.length==2
         from = Building.where(:mit => matches[0]).first
