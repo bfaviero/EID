@@ -159,7 +159,7 @@ class MapController < ApplicationController
         end
         i+=1
       end #route.stops.each]
-      routeshash[route][1] += middleStops
+      routeshash[route.nid][1] += middleStops
     end
 
     routeshash.each do |route, fromto|
