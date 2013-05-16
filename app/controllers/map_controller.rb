@@ -189,7 +189,7 @@ class MapController < ApplicationController
               end
             end
             arrival = ArrivalTimeVehicle(vid, dstop.nid, routeNID, wait)
-            lastWalk = cache[dstop.id][toBuilding.id]
+            lastWalk = stb[dstop.id][toBuilding.id]
             route = Route.where(:nid => routeNID).first
             goodRoute = [route.name, wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
             options << goodRoute
