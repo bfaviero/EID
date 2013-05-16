@@ -222,16 +222,12 @@ class MapController < ApplicationController
       response = "The " + bestOption[] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
         " You should get off at the " + bestOption[4] + " stop.".to_json
       response = response.gsub('"', '')
-      xml_data(bestOption, response)
     end
+    xml_data2(response)
+    text(number, response)
 
-
-
-
-    puts @xml
     respond_to do |format|
         format.xml { render :xml => @xml }
-        format.json {render :json => response}
     end
   end
   #Calculates the fastest route based on the origin and destination
