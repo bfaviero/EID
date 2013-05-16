@@ -34,11 +34,9 @@ class MapController < ApplicationController
     puts "received text"
     body = params["Body"]
     number = params["From"]
-    bldg =  /([A-Z]+\d*)|([A-Z]+)|(\d+)/
+    bldg =  /([A-Z]+\d*)|(\d+)/
     matchBldg = body.scan bldg
-
-    if matchBldg.length == 2 or matchBldg.length==1
-      matches = []
+    matches = []
       matchBldg.each do |tofrom|
         tofrom.each do |m|
           if m != nil
@@ -46,7 +44,7 @@ class MapController < ApplicationController
           end
         end
       end
-
+    if matches.length == 2 or matches.length==1
       if matchBldg.length==2
         from = Building.where(:mit => matches[0]).first
         to = Building.where(:mit => matches[1]).first
