@@ -135,14 +135,14 @@ class MapController < ApplicationController
     end
 
     #We have route => [from, [to]]
-    routeshash.each do |route, info|
+    routeshash.each do |routeNID, info|
       middleStops = []
       hitDestination = false
       fromIndex = 0
       toIndex = 0
       #get indices
       i = 0
-      route = Route.where(:nid => route).first
+      route = Route.where(:nid => routeNID).first
       route.stops.each do |stop|
         if stop==info[0]
           fromIndex = i
@@ -159,10 +159,11 @@ class MapController < ApplicationController
         end
         i+=1
       end #route.stops.each]
-      routeshash[route.nid][1] += middleStops
+      puts routeshash
+      routeshash[routeNID][1] += middleStops
     end
 
-    routeshash.each do |route, fromto|
+    routeshash.each do |routeNID, fromto|
       if fromto.length==2 and fromto[0] and fromto[1].length>0
         ostop = fromto[0]
         dstops = fromto[1]
@@ -173,7 +174,8 @@ class MapController < ApplicationController
           end
 
           #get wait time until shuttle gets to origin stop
-          getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+key+".json"
+          getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+routeNID+".json"
+          raise
           waitResponse = RestClient.get getRequest
           waitResponseJSON = JSON.parse(waitResponse)
           wait = 0
@@ -189,14 +191,15 @@ class MapController < ApplicationController
             end
             arrival = ArrivalTimeVehicle(vid, dstop.nid, key, wait)
             lastWalk = cache[dstop.id][toBuilding.id]
-            goodRoute = [route, wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
+            route = Route.where(:nid => routeNID).first
+            goodRoute = [route.name, wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
             options << goodRoute
           end
         end#dstops.each
       end
     end
     #walking time
-    walkOption = ["walk", 0, 0, "", "", "", "", btb[fromBuilding][toBuilding]]
+    walkOption = ["walk", 0, 0, "", "", "", "", btb[fromBuilding.id][toBuilding.id]]
     options << walkOption
     #now put it all together
     #find best
@@ -265,28 +268,31 @@ class MapController < ApplicationController
           dstop = value[1]
           #time to walk to the stop
           timeToStop = TimeToStop(fromBuilding, ostop)
-
-          #get wait time until shuttle gets to origin stop
-          getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+key+".json"
-          waitResponse = RestClient.get getRequest
-          waitResponseJSON = JSON.parse(waitResponse)
           wait = 0
           vid = ""
+          #get wait time until shuttle gets to origin stop
+          begin
+            getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+key+".json"
+            waitResponseJSONesponse = RestClient.get getRequest
+            waitResponseJSON = JSON.parse(waitResponse)
 
-          if waitResponseJSON["items"].length > 0
-            waitResponseJSON["items"].each do |item|
-              wait = item["seconds"]
-              vid = item["vehicle_id"]
-              if wait>timeToStop
-                break
+
+            if waitResponseJSON["items"].length > 0
+              waitResponseJSON["items"].each do |item|
+                wait = item["seconds"]
+                vid = item["vehicle_id"]
+                if wait>timeToStop
+                  break
+                end
               end
-            end
-            arrival = ArrivalTimeVehicle(vid, dstop.nid, key, wait)
-            lastWalk = WalkingTime(dstop, toBuilding)
+              arrival = ArrivalTimeVehicle(vid, dstop.nid, key, wait)
+              lastWalk = WalkingTime(dstop, toBuilding)
 
-            finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
-          else
-            routefound = true
+              finalRoutesHash[key] = [wait, arrival, ostop.name, dstop.name, "", timeToStop, lastWalk]
+            else
+              routefound = true
+            end
+          rescue
           end
       end
     end
