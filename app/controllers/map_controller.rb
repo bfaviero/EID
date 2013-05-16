@@ -171,10 +171,9 @@ class MapController < ApplicationController
     if walk>0
       walkingOption = [0, 0, "", "", "", 0, walk]
       if walkingOption[6] < bestOption[1]+bestOption[6]
-        arrivalTime = Time.zone.now+walkingOption[6]
+        arrivaltime = Time.zone.now+walkingOption[6]
         arrivaltime = arrivaltime.strftime("%I:%M")
-        text(number, "Your best option is walking, which will get you there at "+arrivalTime+".")
-        textbool = false
+        text(number, "Your best option is walking, which will get you there at "+arrivaltime+".")
       end
     end
     if bestOption[0]!=9999
