@@ -44,6 +44,8 @@ class MapController < ApplicationController
           end
         end
       end
+    puts "MATCHES"
+    puts matches
     if matches.length == 2 or matches.length==1
       if matches.length==2
         from = Building.where(:mit => matches[0]).first
@@ -52,6 +54,9 @@ class MapController < ApplicationController
         from = Building.where(:mit => "W20").first
         to = Building.where(:mit => matches[0]).first
       end
+      puts "FROMTO"
+      puts from
+      puts to
       if from and to
         logic(number, from.mit, to.mit, true)
 
