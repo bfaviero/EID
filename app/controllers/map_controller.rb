@@ -39,7 +39,9 @@ class MapController < ApplicationController
     bldg =  /([A-Z]+\d*)|(\d+)/
     matchBldg = body.scan bldg
     matches = []
+    puts "matchBldg"
     puts matchBldg
+    puts "end MatchBldg"
     matchBldg.each do |tofrom|
       tofrom.each do |m|
         if m != nil
