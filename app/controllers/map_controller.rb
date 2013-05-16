@@ -175,7 +175,6 @@ class MapController < ApplicationController
 
           #get wait time until shuttle gets to origin stop
           getRequest = 'http://proximobus.appspot.com/agencies/mit/stops/'+ostop.nid+'/predictions/by-route/'+routeNID+".json"
-          raise
           waitResponse = RestClient.get getRequest
           waitResponseJSON = JSON.parse(waitResponse)
           wait = 0
