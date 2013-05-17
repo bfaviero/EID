@@ -236,6 +236,7 @@ class MapController < ApplicationController
         response = "The Saferide is not running at this time. "
         text(number, response)
     else
+      response = ""
       departure = Time.zone.now+best[1]
       arrive = Time.zone.now+best[2]+best[7]
       response += "The " + best[0] + " leaves from " + best[3] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
