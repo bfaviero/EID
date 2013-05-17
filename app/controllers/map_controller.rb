@@ -226,10 +226,10 @@ class MapController < ApplicationController
         best = option
       end
     end
+    response = ""
     if walkOption[2]+walkOption[7]<best[2]+best[7]
       arrivaltime = Time.zone.now+walkOption[7]
       arrivaltime = arrivaltime.strftime("%I:%M")
-      response = ""
       response = "Your best option is walking, which will get you there at "+arrivaltime+". "
     end
     if routefound == false
