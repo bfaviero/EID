@@ -459,7 +459,6 @@ class MapController < ApplicationController
       return arrival
     end
     def text(number, response)
-      puts "SENDING TEXT SENDING TEXT SENDING TEXT SENDING TEXT "
       twilio_sid = "AC04688af1bb3a335d3a01229ae63faaa5"
       twilio_token = "6d0a0bfea26a14afc13e651d4c415110"
       twilio_phone_number = "9543562027"
