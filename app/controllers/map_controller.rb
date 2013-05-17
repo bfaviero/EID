@@ -333,7 +333,7 @@ class MapController < ApplicationController
     if bestOption[0]!=9999
       departure = Time.zone.now+bestOption[0]
       arrive = Time.zone.now+bestOption[1]+bestOption[6]
-      response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
+      response = "The " + bestOption[4] + " leaves from " + bestOption[2] + " at " + departure.strftime("%I:%M") + " and gets you there at " + arrive.strftime("%I:%M") + "." +
         " You should get off at the " + bestOption[3] + " stop.".to_json
       puts "RESPONSE"
       puts response
@@ -464,14 +464,16 @@ class MapController < ApplicationController
       twilio_sid = "AC04688af1bb3a335d3a01229ae63faaa5"
       twilio_token = "6d0a0bfea26a14afc13e651d4c415110"
       twilio_phone_number = "9543562027"
-
+      response = response.chars.each_slice(158).map(&:join)
       @twilio_client = Twilio::REST::Client.new twilio_sid, twilio_token
-
-      @twilio_client.account.sms.messages.create(
+      response.each do |resp|
+        @twilio_client.account.sms.messages.create(
         :from => "+1#{twilio_phone_number}",
         :to => number,
-        :body => response
+        :body => resp
       )
+      end
+
     end
 end
 
