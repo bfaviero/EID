@@ -219,26 +219,33 @@ class MapController < ApplicationController
     walkOption = ["walk", 0, 0, "", "", "", "", btb[fromBuilding.id][toBuilding.id]]
     #now put it all together
     #find best
-    best = options[0]
-    options.each do |option|
-      if option[2] + option[7] < best[2] + best[7]
-        best = option
+    best = walkOption
+    walkbest = true
+    if routefound
+      options.each do |option|
+        if option[2] + option[7] < best[2] + best[7]
+          best = option
+          walkbest = false
+        end
       end
     end
+
     response = ""
-    if walkOption[2]+walkOption[7]<best[2]+best[7]
-      arrivaltime = Time.zone.now+walkOption[7]
-      arrivaltime = arrivaltime.strftime("%I:%M")
-      response += "Your best option is walking, which will get you there at "+arrivaltime+". "
-    end
+    walkingArrival = Time.zone.now+walkOption[7]
+    walkingArrival = walkingArrival.strftime("%I:%M")
     if routefound == false
-        response += "The Saferide is not running at this time. "
+        response += "The Saferide is not running at this time. Walking gets you there at "+walkingArrival+". "
     else
+      if walkbest
+        response += "Your best option is walking, which gets you there at "+walkingArrival+". "
+      end
       departure = Time.zone.now+best[1]
       arrive = Time.zone.now+best[2]+best[7]
       response += "The " + best[0] + " leaves from " + best[3] + " at " + departure.strftime("%I:%M") + " and will get you to your destination at " + arrive.strftime("%I:%M") + "." +
         " You should get off at the " + best[4] + " stop. "
     end
+
+
     response = response.gsub('"', '')
     text(number, response)
   end
