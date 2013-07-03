@@ -214,7 +214,6 @@ class MapController < ApplicationController
         end#dstops.each
       end
     end
-    raise
     #walking time
     walkOption = ["walk", 0, 0, "", "", "", "", btb[fromBuilding.id][toBuilding.id]]
     walkOption = ["worst", 99999, 99999, "", "", "", "", 99999]
