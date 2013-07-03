@@ -120,7 +120,7 @@ class MapController < ApplicationController
     if fromBuilding.address.include? "Cambridge" and toBuilding.address.include? "Cambridge"
       routeshash = {"saferidecamball" => 0, "saferidecambeast" => 0,  "saferidecambwest" => 0}
     else
-      routeshash = {"boston" => 0, "saferidebostonall" => 0, "saferidebostone" => 0,  "saferidebostonw" => 0}
+      routeshash = {"saferidebostonall" => 0, "boston" => 0, "saferidebostone" => 0,  "saferidebostonw" => 0}
     end
 
     options = []
@@ -147,7 +147,6 @@ class MapController < ApplicationController
         end
       end
     end
-
     #We have route => [from, [to]]
     routeshash.each do |routeNID, info|
       middleStops = []
@@ -194,6 +193,7 @@ class MapController < ApplicationController
           rescue
             retry
           end
+          raise
           waitResponseJSON = JSON.parse(waitResponse)
           wait = 0
           vid = ""
@@ -215,11 +215,14 @@ class MapController < ApplicationController
         end#dstops.each
       end
     end
+    raise
     #walking time
     walkOption = ["walk", 0, 0, "", "", "", "", btb[fromBuilding.id][toBuilding.id]]
+    walkOption = ["worst", 99999, 99999, "", "", "", "", 99999]
+
     #now put it all together
     #find best
-    best = walkOption
+    best = worst
     walkbest = true
     if routefound
       options.each do |option|
