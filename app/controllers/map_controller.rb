@@ -193,7 +193,6 @@ class MapController < ApplicationController
           rescue
             retry
           end
-          raise
           waitResponseJSON = JSON.parse(waitResponse)
           wait = 0
           vid = ""
