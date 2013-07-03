@@ -216,7 +216,7 @@ class MapController < ApplicationController
     end
     #walking time
     walkOption = ["walk", 0, 0, "", "", "", "", btb[fromBuilding.id][toBuilding.id]]
-    walkOption = ["worst", 99999, 99999, "", "", "", "", 99999]
+    worst = ["worst", 99999, 99999, "", "", "", "", 99999]
 
     #now put it all together
     #find best
