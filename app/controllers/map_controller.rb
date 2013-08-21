@@ -1,19 +1,7 @@
 class MapController < ApplicationController
-  around_filter :profile if Rails.env == 'development'
   require 'builder'
   require 'rest_client'
   respond_to :xml
-  def profile
-    if params[:profile] && result = RubyProf.profile { yield }
-
-      out = StringIO.new
-      RubyProf::GraphHtmlPrinter.new(result).print out, :min_percent => 0
-      self.response_body = out.string
-
-    else
-      yield
-    end
-  end
   def textUser
     number = params[:callerid]
     response = params[:response]
@@ -24,6 +12,8 @@ class MapController < ApplicationController
     end
   end
 
+  def switchBuilding(b)
+  end
 
 
   def textxml
@@ -39,7 +29,6 @@ class MapController < ApplicationController
       }
     }
     end
-
 
   #Receives a text message and processes its commands
   def receive
